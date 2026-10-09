@@ -1,5 +1,6 @@
 package com.lxb.lxbsessential;
 
+import com.lxb.lxbsessential.teleport.TeleportService;
 import com.lxb.lxbsessential.util.Storage;
 import net.minecraftforge.common.DimensionManager;
 import net.minecraftforge.fml.common.Mod;
@@ -24,6 +25,7 @@ public class LxbsEssential {
 
     @Mod.EventHandler
     public void onServerStopped(FMLServerStoppedEvent event) {
+        TeleportService.reset();
         Storage.close();
     }
 }

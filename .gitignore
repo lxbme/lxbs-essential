@@ -26,3 +26,6 @@ run
 
 # local development docs (never committed)
 docs/superpowers/
+
+# log4j output from unit tests (MC log4j2 config on the test classpath)
+logs
