@@ -1,5 +1,9 @@
 package com.lxb.lxbsessential;
 
+import com.lxb.lxbsessential.command.CommandDelHome;
+import com.lxb.lxbsessential.command.CommandHome;
+import com.lxb.lxbsessential.command.CommandHomes;
+import com.lxb.lxbsessential.command.CommandSetHome;
 import com.lxb.lxbsessential.teleport.TeleportService;
 import com.lxb.lxbsessential.util.Storage;
 import net.minecraftforge.common.DimensionManager;
@@ -21,6 +25,11 @@ public class LxbsEssential {
         Path root = DimensionManager.getCurrentSaveRootDirectory().toPath().resolve(Tags.MOD_ID);
         Storage.open(root);
         LOGGER.info("Data directory: {}", root);
+
+        event.registerServerCommand(new CommandSetHome());
+        event.registerServerCommand(new CommandHome());
+        event.registerServerCommand(new CommandDelHome());
+        event.registerServerCommand(new CommandHomes());
     }
 
     @Mod.EventHandler
