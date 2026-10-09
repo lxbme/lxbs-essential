@@ -1,5 +1,6 @@
 package com.lxb.lxbsessential.teleport;
 
+import com.lxb.lxbsessential.LxbsEssential;
 import com.lxb.lxbsessential.Tags;
 import com.lxb.lxbsessential.config.ModConfig;
 import com.lxb.lxbsessential.data.Location;
@@ -126,7 +127,10 @@ public final class TeleportService {
             }
             if (tick >= pending.executeAt) {
                 it.remove();
-                due.add(() -> execute(player, pending.target, pending.label, true));
+                due.add(() -> SafeRun.run(() -> execute(player, pending.target, pending.label, true), e -> {
+                    LxbsEssential.LOGGER.error("Teleport of {} failed", player.getName(), e);
+                    player.sendMessage(Messages.teleportFailed());
+                }));
                 continue;
             }
             int seconds = WarmupRules.secondsLeft(tick, pending.executeAt);
@@ -155,6 +159,8 @@ public final class TeleportService {
         }
         if (player.dimension != target.dim) {
             server.getPlayerList().transferPlayerToDimension(player, target.dim, new SafeTeleporter(target));
+            // Vanilla changeDimension does this after the transfer; without it the client shows 0 XP.
+            player.addExperienceLevel(0);
         }
         player.connection.setPlayerLocation(target.x, target.y, target.z, target.yaw, target.pitch);
         player.fallDistance = 0F;

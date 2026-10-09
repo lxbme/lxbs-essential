@@ -142,6 +142,10 @@ public final class Messages {
         return error("Dimension " + dim + " no longer exists.");
     }
 
+    public static ITextComponent teleportFailed() {
+        return error("Teleport failed, please contact an admin.");
+    }
+
     public static ITextComponent teleported(String label) {
         return info("Teleported to " + label + ".");
     }
