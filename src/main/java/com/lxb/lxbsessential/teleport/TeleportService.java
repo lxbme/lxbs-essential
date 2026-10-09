@@ -53,13 +53,19 @@ public final class TeleportService {
     }
 
     public static void request(EntityPlayerMP player, Location target, String label) {
-        if (ModConfig.isDimensionBlocked(player.dimension)) {
-            player.sendMessage(Messages.dimensionBlockedHere());
-            return;
-        }
-        if (ModConfig.isDimensionBlocked(target.dim)) {
-            player.sendMessage(Messages.dimensionBlockedTarget());
-            return;
+        switch (TeleportChecks.check(player.dimension, target.dim,
+                ModConfig::isDimensionBlocked, DimensionManager::isDimensionRegistered)) {
+            case BLOCKED_HERE:
+                player.sendMessage(Messages.dimensionBlockedHere());
+                return;
+            case BLOCKED_TARGET:
+                player.sendMessage(Messages.dimensionBlockedTarget());
+                return;
+            case MISSING_TARGET:
+                player.sendMessage(Messages.dimensionMissing(target.dim));
+                return;
+            default:
+                break;
         }
         UUID id = player.getUniqueID();
         boolean bypass = ModConfig.teleport.opsBypass && isOp(player);
@@ -158,6 +164,8 @@ public final class TeleportService {
             player.dismountRidingEntity();
         }
         if (player.dimension != target.dim) {
+            // Vanilla portals refuse ridden players; a passenger cannot follow into another world.
+            player.removePassengers();
             server.getPlayerList().transferPlayerToDimension(player, target.dim, new SafeTeleporter(target));
             // Vanilla changeDimension does this after the transfer; without it the client shows 0 XP.
             player.addExperienceLevel(0);

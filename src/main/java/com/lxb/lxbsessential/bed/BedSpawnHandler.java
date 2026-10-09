@@ -17,6 +17,7 @@ import net.minecraftforge.common.util.FakePlayer;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.Event;
+import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 /**
@@ -30,7 +31,8 @@ public final class BedSpawnHandler {
     private BedSpawnHandler() {
     }
 
-    @SubscribeEvent
+    /** Lowest priority so protection mods can cancel the click before the spawn point is set. */
+    @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onRightClickBlock(PlayerInteractEvent.RightClickBlock event) {
         if (!ModConfig.bed.enabled) {
             return;

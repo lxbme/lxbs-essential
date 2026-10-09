@@ -8,11 +8,14 @@ import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
 import java.lang.reflect.Type;
+import java.nio.channels.Channels;
+import java.nio.channels.FileChannel;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.AtomicMoveNotSupportedException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.nio.file.StandardOpenOption;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
@@ -64,8 +67,13 @@ public final class JsonIO {
     public static void write(Path file, Object value) throws IOException {
         Files.createDirectories(file.getParent());
         Path tmp = file.resolveSibling(file.getFileName() + ".tmp");
-        try (Writer writer = Files.newBufferedWriter(tmp, StandardCharsets.UTF_8)) {
+        try (FileChannel channel = FileChannel.open(tmp, StandardOpenOption.WRITE,
+                StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+             Writer writer = Channels.newWriter(channel, StandardCharsets.UTF_8.newEncoder(), -1)) {
             GSON.toJson(value, writer);
+            writer.flush();
+            // Make the data durable before the rename, so a power loss cannot leave an empty file behind.
+            channel.force(true);
         }
         try {
             Files.move(tmp, file, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
