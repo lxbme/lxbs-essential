@@ -1,9 +1,14 @@
 package com.lxb.lxbsessential;
 
+import com.lxb.lxbsessential.command.CommandBack;
 import com.lxb.lxbsessential.command.CommandDelHome;
+import com.lxb.lxbsessential.command.CommandDelWarp;
 import com.lxb.lxbsessential.command.CommandHome;
 import com.lxb.lxbsessential.command.CommandHomes;
 import com.lxb.lxbsessential.command.CommandSetHome;
+import com.lxb.lxbsessential.command.CommandSetWarp;
+import com.lxb.lxbsessential.command.CommandWarp;
+import com.lxb.lxbsessential.command.CommandWarps;
 import com.lxb.lxbsessential.teleport.TeleportService;
 import com.lxb.lxbsessential.util.Storage;
 import net.minecraftforge.common.DimensionManager;
@@ -30,6 +35,11 @@ public class LxbsEssential {
         event.registerServerCommand(new CommandHome());
         event.registerServerCommand(new CommandDelHome());
         event.registerServerCommand(new CommandHomes());
+        event.registerServerCommand(new CommandWarp());
+        event.registerServerCommand(new CommandWarps());
+        event.registerServerCommand(new CommandSetWarp());
+        event.registerServerCommand(new CommandDelWarp());
+        event.registerServerCommand(new CommandBack());
     }
 
     @Mod.EventHandler

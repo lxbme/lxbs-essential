@@ -25,4 +25,28 @@ class CommandPermissionTest {
         assertEquals("delhome", new CommandDelHome().getName());
         assertEquals("homes", new CommandHomes().getName());
     }
+
+    @Test
+    void warpAndBackCommandsAreOpenToEveryone() {
+        CommandBase[] commands = {new CommandWarp(), new CommandWarps(), new CommandBack()};
+        for (CommandBase command : commands) {
+            assertTrue(command.checkPermission(null, null), command.getName());
+            assertEquals(0, command.getRequiredPermissionLevel(), command.getName());
+        }
+    }
+
+    @Test
+    void warpManagementRequiresOp() {
+        assertEquals(2, new CommandSetWarp().getRequiredPermissionLevel());
+        assertEquals(2, new CommandDelWarp().getRequiredPermissionLevel());
+    }
+
+    @Test
+    void warpAndBackCommandNames() {
+        assertEquals("warp", new CommandWarp().getName());
+        assertEquals("warps", new CommandWarps().getName());
+        assertEquals("setwarp", new CommandSetWarp().getName());
+        assertEquals("delwarp", new CommandDelWarp().getName());
+        assertEquals("back", new CommandBack().getName());
+    }
 }
