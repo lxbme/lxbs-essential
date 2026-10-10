@@ -4,6 +4,7 @@ import com.lxb.lxbsessential.command.CommandBack;
 import com.lxb.lxbsessential.command.CommandDelHome;
 import com.lxb.lxbsessential.command.CommandDelWarp;
 import com.lxb.lxbsessential.command.CommandFix;
+import com.lxb.lxbsessential.command.CommandHeal;
 import com.lxb.lxbsessential.command.CommandHome;
 import com.lxb.lxbsessential.command.CommandHomes;
 import com.lxb.lxbsessential.command.CommandPhase;
@@ -14,6 +15,8 @@ import com.lxb.lxbsessential.command.CommandWarp;
 import com.lxb.lxbsessential.command.CommandWarps;
 import com.lxb.lxbsessential.config.ModConfig;
 import com.lxb.lxbsessential.death.DeathLog;
+import com.lxb.lxbsessential.heal.FirstAidBridge;
+import com.lxb.lxbsessential.heal.SimpleDifficultyBridge;
 import com.lxb.lxbsessential.phase.SrpBridge;
 import com.lxb.lxbsessential.teleport.TeleportService;
 import com.lxb.lxbsessential.util.Storage;
@@ -49,7 +52,31 @@ public class LxbsEssential {
         event.registerServerCommand(new CommandBack());
         event.registerServerCommand(new CommandShareDeath());
         event.registerServerCommand(new CommandFix());
+        event.registerServerCommand(new CommandHeal(bindFirstAid(), bindSimpleDifficulty()));
         registerPhaseCommand(event);
+    }
+
+    private static FirstAidBridge bindFirstAid() {
+        if (!Loader.isModLoaded("firstaid")) {
+            return null;
+        }
+        FirstAidBridge bridge = FirstAidBridge.bind(FirstAidBridge.CAPABILITY_HOLDER);
+        if (bridge == null) {
+            LOGGER.warn("First Aid is installed but its API does not match; /heal will only restore vanilla health");
+        }
+        return bridge;
+    }
+
+    private static SimpleDifficultyBridge bindSimpleDifficulty() {
+        if (!Loader.isModLoaded("simpledifficulty")) {
+            return null;
+        }
+        SimpleDifficultyBridge bridge = SimpleDifficultyBridge.bind(
+                SimpleDifficultyBridge.CAPABILITIES, SimpleDifficultyBridge.TEMPERATURE_ENUM);
+        if (bridge == null) {
+            LOGGER.warn("SimpleDifficulty is installed but its API does not match; /heal will skip thirst and temperature");
+        }
+        return bridge;
     }
 
     /** /phase only exists when Scape and Run: Parasites is installed and its API matches what SrpBridge expects. */

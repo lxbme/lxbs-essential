@@ -71,4 +71,10 @@ class CommandPermissionTest {
         assertEquals("fix", new CommandFix().getName());
         assertEquals(2, new CommandFix().getRequiredPermissionLevel());
     }
+
+    @Test
+    void healRequiresOp() {
+        assertEquals("heal", new CommandHeal(null, null).getName());
+        assertEquals(2, new CommandHeal(null, null).getRequiredPermissionLevel());
+    }
 }

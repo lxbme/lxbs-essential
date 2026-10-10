@@ -259,6 +259,16 @@ public final class Messages {
         return info("Your equipment was repaired by an admin.");
     }
 
+    // heal
+
+    public static ITextComponent healed(String playerName) {
+        return info("Healed " + playerName + ".");
+    }
+
+    public static ITextComponent healedByAdmin() {
+        return info("You were healed by an admin.");
+    }
+
     // storage / bed
 
     public static ITextComponent saveFailed() {
