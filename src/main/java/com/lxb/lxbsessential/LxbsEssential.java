@@ -14,6 +14,7 @@ import com.lxb.lxbsessential.command.CommandSetWarp;
 import com.lxb.lxbsessential.command.CommandShareDeath;
 import com.lxb.lxbsessential.command.CommandWarp;
 import com.lxb.lxbsessential.command.CommandWarps;
+import com.lxb.lxbsessential.command.CommandXpBank;
 import com.lxb.lxbsessential.config.ModConfig;
 import com.lxb.lxbsessential.death.DeathLog;
 import com.lxb.lxbsessential.heal.FirstAidBridge;
@@ -57,6 +58,9 @@ public class LxbsEssential {
         event.registerServerCommand(new CommandShareDeath());
         event.registerServerCommand(new CommandFix());
         event.registerServerCommand(new CommandHeal(bindFirstAid(), bindSimpleDifficulty()));
+        if (ModConfig.bank.enabled) {
+            event.registerServerCommand(new CommandXpBank());
+        }
         registerPhaseCommand(event);
     }
 

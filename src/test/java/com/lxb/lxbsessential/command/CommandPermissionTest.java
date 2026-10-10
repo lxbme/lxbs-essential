@@ -77,4 +77,14 @@ class CommandPermissionTest {
         assertEquals("heal", new CommandHeal(null, null).getName());
         assertEquals(2, new CommandHeal(null, null).getRequiredPermissionLevel());
     }
+
+    /** Everyone may use /xpbank; the admin subcommand checks operator rights itself. */
+    @Test
+    void xpBankIsOpenToEveryone() {
+        CommandXpBank command = new CommandXpBank();
+        assertEquals("xpbank", command.getName());
+        assertTrue(command.getAliases().contains("xb"));
+        assertTrue(command.checkPermission(null, null));
+        assertEquals(0, command.getRequiredPermissionLevel());
+    }
 }
