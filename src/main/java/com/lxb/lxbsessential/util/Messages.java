@@ -245,6 +245,20 @@ public final class Messages {
         return error("Parasite evolution is disabled on this server.");
     }
 
+    // fix
+
+    public static ITextComponent repaired(int count, String playerName) {
+        return info("Repaired " + count + " item(s) for " + playerName + ".");
+    }
+
+    public static ITextComponent nothingToRepair() {
+        return error("Nothing to repair.");
+    }
+
+    public static ITextComponent repairedByAdmin() {
+        return info("Your equipment was repaired by an admin.");
+    }
+
     // storage / bed
 
     public static ITextComponent saveFailed() {

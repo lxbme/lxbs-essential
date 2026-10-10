@@ -3,6 +3,7 @@ package com.lxb.lxbsessential;
 import com.lxb.lxbsessential.command.CommandBack;
 import com.lxb.lxbsessential.command.CommandDelHome;
 import com.lxb.lxbsessential.command.CommandDelWarp;
+import com.lxb.lxbsessential.command.CommandFix;
 import com.lxb.lxbsessential.command.CommandHome;
 import com.lxb.lxbsessential.command.CommandHomes;
 import com.lxb.lxbsessential.command.CommandPhase;
@@ -47,6 +48,7 @@ public class LxbsEssential {
         event.registerServerCommand(new CommandDelWarp());
         event.registerServerCommand(new CommandBack());
         event.registerServerCommand(new CommandShareDeath());
+        event.registerServerCommand(new CommandFix());
         registerPhaseCommand(event);
     }
 
