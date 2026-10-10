@@ -42,4 +42,16 @@ class FeesTest {
     void freeWithdrawalsCostExactlyWhatIsNeeded() {
         assertEquals(1234, Fees.costFor(1234, 0.0));
     }
+
+    /** A high fee with a huge withdrawal must not loop forever on the server thread. */
+    @Test
+    void costForTerminatesForHugeAmountsAtHighFees() throws InterruptedException {
+        long[] result = new long[1];
+        Thread worker = new Thread(() -> result[0] = Fees.costFor(4_499_999_837_500_002_220L, 99.0));
+        worker.setDaemon(true);
+        worker.start();
+        worker.join(2000);
+        assertTrue(!worker.isAlive(), "costFor did not finish");
+        assertEquals(Long.MAX_VALUE, result[0]);
+    }
 }

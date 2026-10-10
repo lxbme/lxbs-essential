@@ -28,8 +28,16 @@ public final class Fees {
         if (feePercent <= 0) {
             return needed;
         }
-        long cost = (long) Math.ceil(needed / (1 - feePercent / 100.0));
+        double estimate = Math.ceil(needed / (1 - feePercent / 100.0));
+        if (estimate >= Long.MAX_VALUE) {
+            // more than any balance can hold; returning instead of counting up avoids overflow and endless loops
+            return Long.MAX_VALUE;
+        }
+        long cost = (long) estimate;
         while (received(cost, feePercent) < needed) {
+            if (cost == Long.MAX_VALUE) {
+                return Long.MAX_VALUE;
+            }
             cost++;
         }
         while (cost > needed && received(cost - 1, feePercent) >= needed) {

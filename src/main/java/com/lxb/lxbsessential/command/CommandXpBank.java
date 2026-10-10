@@ -11,6 +11,7 @@ import com.lxb.lxbsessential.config.ModConfig;
 import com.lxb.lxbsessential.util.Messages;
 import com.mojang.authlib.GameProfile;
 import net.minecraft.command.CommandException;
+import net.minecraft.command.EntitySelector;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -160,7 +161,11 @@ public final class CommandXpBank extends PlayerCommand {
             int levels = parseInt(args[1], 1, MAX_INPUT);
             long target = (long) level + levels;
             if (target <= XpMath.MAX_LEVEL) {
-                cost = Math.min(balance, Fees.costFor(XpMath.pointsBetween(level, (int) target, progress), feePercent));
+                long needed = XpMath.pointsBetween(level, (int) target, progress);
+                // the cost is never below what is needed, so only work it out when the balance could cover it
+                if (needed < balance) {
+                    cost = Math.min(balance, Fees.costFor(needed, feePercent));
+                }
             }
         }
         long amount = cost;
@@ -180,7 +185,7 @@ public final class CommandXpBank extends PlayerCommand {
             throw new WrongUsageException("/xpbank pay <player> <points>");
         }
         EntityPlayerMP player = getCommandSenderAsPlayer(sender);
-        Target target = resolve(server, args[1]);
+        Target target = resolve(server, sender, args[1]);
         if (target == null) {
             player.sendMessage(Messages.unknownPlayer(args[1]));
             return;
@@ -219,7 +224,7 @@ public final class CommandXpBank extends PlayerCommand {
             throw new WrongUsageException("/xpbank admin <balance|set|add> <player> [points]");
         }
         String action = args[1].toLowerCase(Locale.ROOT);
-        Target target = resolve(server, args[2]);
+        Target target = resolve(server, sender, args[2]);
         if (target == null) {
             sender.sendMessage(Messages.unknownPlayer(args[2]));
             return;
@@ -264,9 +269,33 @@ public final class CommandXpBank extends PlayerCommand {
         }
     }
 
-    /** Online players first, then names recorded in the bank, then the server's profile cache. */
+    /**
+     * Single-player selectors (@p, @r) first, then UUIDs (vanilla expands @a in username slots into UUIDs),
+     * then online players, names recorded in the bank, and the server's profile cache.
+     */
     @Nullable
-    private static Target resolve(MinecraftServer server, String name) {
+    private static Target resolve(MinecraftServer server, ICommandSender sender, String name) {
+        if (EntitySelector.isSelector(name)) {
+            try {
+                EntityPlayerMP selected = EntitySelector.matchOnePlayer(sender, name);
+                return selected == null ? null : new Target(selected.getUniqueID(), selected.getName(), selected);
+            } catch (CommandException e) {
+                return null;
+            }
+        }
+        UUID uuid = uuidOrNull(name);
+        if (uuid != null) {
+            EntityPlayerMP byUuid = server.getPlayerList().getPlayerByUUID(uuid);
+            if (byUuid != null) {
+                return new Target(uuid, byUuid.getName(), byUuid);
+            }
+            String known = bank().ledger().name(uuid);
+            if (!known.isEmpty()) {
+                return new Target(uuid, known, null);
+            }
+            GameProfile cachedProfile = server.getPlayerProfileCache().getProfileByUUID(uuid);
+            return cachedProfile == null ? null : new Target(uuid, cachedProfile.getName(), null);
+        }
         EntityPlayerMP online = server.getPlayerList().getPlayerByUsername(name);
         if (online != null) {
             return new Target(online.getUniqueID(), online.getName(), online);
@@ -283,6 +312,15 @@ public final class CommandXpBank extends PlayerCommand {
             }
         }
         return null;
+    }
+
+    @Nullable
+    static UUID uuidOrNull(String text) {
+        try {
+            return UUID.fromString(text);
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
     }
 
     /**
