@@ -120,4 +120,61 @@ class MessagesTest {
         assertEquals("Parasites cannot evolve here.",
                 Messages.phaseReport(-2, -20000, 0, false).getUnformattedText());
     }
+
+    private static String text(java.util.List<ITextComponent> lines) {
+        StringBuilder sb = new StringBuilder();
+        for (ITextComponent line : lines) {
+            sb.append(line.getUnformattedText()).append('\n');
+        }
+        return sb.toString();
+    }
+
+    @Test
+    void bankHelpListsPlayerCommandsRulesAndNoAdmin() {
+        java.util.List<ITextComponent> lines = Messages.bankHelp(1.0, 30, 30970, 100, 5.0);
+        String all = text(lines);
+
+        assertEquals(true, all.contains("/xpbank deposit <levels|all>"));
+        assertEquals(true, all.contains("/xpbank withdraw <levels|all>"));
+        assertEquals(true, all.contains("/xpbank pay <player> <points>"));
+        assertEquals(false, all.contains("admin"));
+        assertEquals("Interest: 1% every 30 minutes you are online, on balances up to 30970 XP (level 100).",
+                lines.get(lines.size() - 2).getUnformattedText());
+        assertEquals("Withdrawals cost a 5% fee.", lines.get(lines.size() - 1).getUnformattedText());
+    }
+
+    @Test
+    void bankHelpFormatsFractionsSingularsAndFreeWithdrawals() {
+        java.util.List<ITextComponent> lines = Messages.bankHelp(1.5, 1, 500, 19, 0.0);
+        assertEquals("Interest: 1.5% every 1 minute you are online, on balances up to 500 XP (level 19).",
+                lines.get(lines.size() - 2).getUnformattedText());
+        assertEquals("Withdrawals are free.", lines.get(lines.size() - 1).getUnformattedText());
+    }
+
+    @Test
+    void bankHelpWithoutInterest() {
+        java.util.List<ITextComponent> lines = Messages.bankHelp(0.0, 30, 30970, 100, 5.0);
+        assertEquals("Interest: none.", lines.get(lines.size() - 2).getUnformattedText());
+    }
+
+    @Test
+    void bankBalanceShowsLevelsAndNextInterest() {
+        assertEquals("Balance: 5345 XP (= level 50 from zero). Next interest in 12 minutes.",
+                Messages.bankBalance(5345, 50, 12).getUnformattedText());
+        assertEquals("Balance: 0 XP (= level 0 from zero).",
+                Messages.bankBalance(0, 0, -1).getUnformattedText());
+    }
+
+    @Test
+    void withdrawalMentionsTheFeeOnlyWhenCharged() {
+        assertEquals("Withdrew 345 XP (fee 18 XP). Balance: 999 XP.",
+                Messages.withdrew(345, 18, 999).getUnformattedText());
+        assertEquals("Withdrew 345 XP. Balance: 999 XP.",
+                Messages.withdrew(345, 0, 999).getUnformattedText());
+    }
+
+    @Test
+    void interestCreditedText() {
+        assertEquals("+12 XP interest (balance: 1234)", Messages.interestCredited(12, 1234).getUnformattedText());
+    }
 }
