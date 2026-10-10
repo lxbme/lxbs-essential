@@ -1,5 +1,6 @@
 package com.lxb.lxbsessential;
 
+import com.lxb.lxbsessential.bank.Bank;
 import com.lxb.lxbsessential.command.CommandBack;
 import com.lxb.lxbsessential.command.CommandDelHome;
 import com.lxb.lxbsessential.command.CommandDelWarp;
@@ -40,6 +41,9 @@ public class LxbsEssential {
         Path root = DimensionManager.getCurrentSaveRootDirectory().toPath().resolve(Tags.MOD_ID);
         Storage.open(root);
         LOGGER.info("Data directory: {}", root);
+        if (ModConfig.bank.enabled) {
+            Bank.open(root);
+        }
 
         event.registerServerCommand(new CommandSetHome());
         event.registerServerCommand(new CommandHome());
@@ -97,6 +101,7 @@ public class LxbsEssential {
     public void onServerStopped(FMLServerStoppedEvent event) {
         TeleportService.reset();
         DeathLog.INSTANCE.clear();
+        Bank.close();
         Storage.close();
     }
 }

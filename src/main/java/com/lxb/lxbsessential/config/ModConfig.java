@@ -26,7 +26,15 @@ public final class ModConfig {
     @Config.Comment("Scape and Run: Parasites integration (only active when SRP is installed)")
     public static Parasites parasites = new Parasites();
 
+    @Config.Comment("XP bank: deposit and withdraw experience, earning interest while online")
+    public static XpBank bank = new XpBank();
+
     private ModConfig() {
+    }
+
+    /** Interest period in server ticks (20 ticks per second). */
+    public static long bankPeriodTicks() {
+        return bank.interestPeriodMinutes * 1200L;
     }
 
     public static boolean isDimensionBlocked(int dim) {
@@ -79,6 +87,27 @@ public final class ModConfig {
     public static final class Parasites {
         @Config.Comment("Let every player use /phase to see the parasite evolution phase where they stand")
         public boolean phaseCommand = true;
+    }
+
+    public static final class XpBank {
+        @Config.Comment("Enable /xpbank and interest")
+        public boolean enabled = true;
+
+        @Config.Comment("Interest per period, in percent of the balance (up to the cap)")
+        @Config.RangeDouble(min = 0, max = 100)
+        public double interestRatePercent = 1.0;
+
+        @Config.Comment("Minutes a player must be online for one interest payment")
+        @Config.RangeInt(min = 1, max = 1440)
+        public int interestPeriodMinutes = 30;
+
+        @Config.Comment("Only this many points of a balance earn interest (30970 = level 100 from zero)")
+        @Config.RangeInt(min = 0, max = 1000000000)
+        public int interestCapPoints = 30970;
+
+        @Config.Comment("Percent of every withdrawal kept as a fee, so XP Tomes stay useful for carrying XP")
+        @Config.RangeDouble(min = 0, max = 99)
+        public double withdrawalFeePercent = 5.0;
     }
 
     @Mod.EventBusSubscriber(modid = Tags.MOD_ID)
