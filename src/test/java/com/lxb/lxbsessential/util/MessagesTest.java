@@ -84,4 +84,40 @@ class MessagesTest {
         assertEquals("-197 63 293", coordinates.getStyle().getClickEvent().getValue());
         assertEquals("-197 63 293", coordinates.getStyle().getInsertion());
     }
+
+    @Test
+    void phaseWithProgressInRegion() {
+        assertEquals("Parasite phase here: 3 (this region) - 1200 / 25000 points to phase 4 (4%)",
+                Messages.phaseReport(3, 1200, 25000, true).getUnformattedText());
+    }
+
+    @Test
+    void phaseInDimensionScope() {
+        assertEquals("Parasite phase here: 0 (this dimension) - 120 / 400 points to phase 1 (30%)",
+                Messages.phaseReport(0, 120, 400, false).getUnformattedText());
+    }
+
+    @Test
+    void phaseProgressNeverShowsMoreThanHundredPercent() {
+        assertEquals("Parasite phase here: 0 (this region) - 450 / 400 points to phase 1 (100%)",
+                Messages.phaseReport(0, 450, 400, true).getUnformattedText());
+    }
+
+    @Test
+    void phaseNotStartedHasNoPercentage() {
+        assertEquals("Parasite phase here: -1 (this region) - -40 / 0 points to phase 0",
+                Messages.phaseReport(-1, -40, 0, true).getUnformattedText());
+    }
+
+    @Test
+    void phaseAtMaximum() {
+        assertEquals("Parasite phase here: 10 (this dimension) - maximum phase",
+                Messages.phaseReport(10, 1900000000, 0, false).getUnformattedText());
+    }
+
+    @Test
+    void phaseMinusTwoCannotEvolve() {
+        assertEquals("Parasites cannot evolve here.",
+                Messages.phaseReport(-2, -20000, 0, false).getUnformattedText());
+    }
 }

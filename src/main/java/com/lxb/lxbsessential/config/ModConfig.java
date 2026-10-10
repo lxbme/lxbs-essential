@@ -23,6 +23,9 @@ public final class ModConfig {
     @Config.Comment("Death location messages")
     public static Death death = new Death();
 
+    @Config.Comment("Scape and Run: Parasites integration (only active when SRP is installed)")
+    public static Parasites parasites = new Parasites();
+
     private ModConfig() {
     }
 
@@ -71,6 +74,11 @@ public final class ModConfig {
     public static final class Death {
         @Config.Comment("After respawning, tell the player where they died, with [Back] and [Share] buttons")
         public boolean showCoordinates = true;
+    }
+
+    public static final class Parasites {
+        @Config.Comment("Let every player use /phase to see the parasite evolution phase where they stand")
+        public boolean phaseCommand = true;
     }
 
     @Mod.EventBusSubscriber(modid = Tags.MOD_ID)

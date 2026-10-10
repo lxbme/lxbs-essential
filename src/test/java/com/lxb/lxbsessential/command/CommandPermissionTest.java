@@ -57,4 +57,12 @@ class CommandPermissionTest {
         assertTrue(command.checkPermission(null, null));
         assertEquals(0, command.getRequiredPermissionLevel());
     }
+
+    @Test
+    void phaseIsOpenToEveryone() {
+        CommandPhase command = new CommandPhase(null);
+        assertEquals("phase", command.getName());
+        assertTrue(command.checkPermission(null, null));
+        assertEquals(0, command.getRequiredPermissionLevel());
+    }
 }

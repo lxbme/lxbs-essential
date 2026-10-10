@@ -218,6 +218,33 @@ public final class Messages {
         return error("You already shared this death.");
     }
 
+    // parasites
+
+    public static ITextComponent phaseReport(int phase, int points, int nextThreshold, boolean region) {
+        if (phase <= -2) {
+            return colored("Parasites cannot evolve here.", TextFormatting.GOLD);
+        }
+        String text = "Parasite phase here: " + phase + (region ? " (this region)" : " (this dimension)") + " - ";
+        if (phase >= 0 && nextThreshold <= 0) {
+            text += "maximum phase";
+        } else {
+            text += points + " / " + nextThreshold + " points to phase " + (phase + 1);
+            if (phase >= 0) {
+                long percent = Math.max(0, Math.min(100, points * 100L / nextThreshold));
+                text += " (" + percent + "%)";
+            }
+        }
+        return colored(text, TextFormatting.GOLD);
+    }
+
+    public static ITextComponent phaseUnavailable() {
+        return error("Could not read parasite data.");
+    }
+
+    public static ITextComponent evolutionDisabled() {
+        return error("Parasite evolution is disabled on this server.");
+    }
+
     // storage / bed
 
     public static ITextComponent saveFailed() {
