@@ -63,4 +63,25 @@ class MessagesTest {
         assertEquals("LxbThh died at dim 0 (-197, 63, 293).",
                 Messages.deathShared("LxbThh", DEATH).getUnformattedText());
     }
+
+    /** 1.12 has no copy-to-clipboard click action, so the coordinates go into the chat box instead. */
+    @Test
+    void deathNoticeCoordinatesFillTheChatBox() {
+        ITextComponent coordinates = part(Messages.deathNotice(DEATH, true), "dim 0 (-197, 63, 293)");
+
+        assertNotNull(coordinates);
+        assertEquals(ClickEvent.Action.SUGGEST_COMMAND, coordinates.getStyle().getClickEvent().getAction());
+        assertEquals("-197 63 293", coordinates.getStyle().getClickEvent().getValue());
+        assertEquals("-197 63 293", coordinates.getStyle().getInsertion());
+    }
+
+    @Test
+    void sharedDeathCoordinatesFillTheChatBox() {
+        ITextComponent coordinates = part(Messages.deathShared("LxbThh", DEATH), "dim 0 (-197, 63, 293)");
+
+        assertNotNull(coordinates);
+        assertEquals(ClickEvent.Action.SUGGEST_COMMAND, coordinates.getStyle().getClickEvent().getAction());
+        assertEquals("-197 63 293", coordinates.getStyle().getClickEvent().getValue());
+        assertEquals("-197 63 293", coordinates.getStyle().getInsertion());
+    }
 }

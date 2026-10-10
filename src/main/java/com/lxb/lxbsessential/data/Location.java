@@ -27,6 +27,12 @@ public final class Location {
                 dim, (int) Math.floor(x), (int) Math.floor(y), (int) Math.floor(z));
     }
 
+    /** Block coordinates as plain numbers, e.g. {@code 12 64 -3}, ready to paste into /tp. */
+    public String blockCoords() {
+        return String.format(Locale.ROOT, "%d %d %d",
+                (int) Math.floor(x), (int) Math.floor(y), (int) Math.floor(z));
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {

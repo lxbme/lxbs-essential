@@ -116,6 +116,22 @@ public final class Messages {
                 .setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TextComponentString(hoverText)));
     }
 
+    /**
+     * Clicking puts the plain coordinates into the chat box (1.12 has no copy-to-clipboard action);
+     * shift-clicking inserts them at the cursor of an open chat box.
+     */
+    private static ITextComponent coordinates(Location location) {
+        String coords = location.blockCoords();
+        ITextComponent component = new TextComponentString(location.describe());
+        component.getStyle()
+                .setUnderlined(true)
+                .setInsertion(coords)
+                .setClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, coords))
+                .setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
+                        new TextComponentString("Click to put the coordinates in your chat box")));
+        return component;
+    }
+
     private static ITextComponent button(String label, String command, String hoverText) {
         ITextComponent button = colored(label, TextFormatting.AQUA);
         clickable(button, command, hoverText);
@@ -175,7 +191,9 @@ public final class Messages {
     // death
 
     public static ITextComponent deathNotice(Location location, boolean withBack) {
-        ITextComponent notice = colored("You died at " + location.describe() + ".", TextFormatting.GOLD);
+        ITextComponent notice = colored("You died at ", TextFormatting.GOLD);
+        notice.appendSibling(coordinates(location));
+        notice.appendSibling(new TextComponentString("."));
         if (withBack) {
             notice.appendSibling(new TextComponentString(" "));
             notice.appendSibling(button("[Back]", "/back", "Teleport back to where you died"));
@@ -186,7 +204,10 @@ public final class Messages {
     }
 
     public static ITextComponent deathShared(String playerName, Location location) {
-        return colored(playerName + " died at " + location.describe() + ".", TextFormatting.GOLD);
+        ITextComponent message = colored(playerName + " died at ", TextFormatting.GOLD);
+        message.appendSibling(coordinates(location));
+        message.appendSibling(new TextComponentString("."));
+        return message;
     }
 
     public static ITextComponent noDeathToShare() {
