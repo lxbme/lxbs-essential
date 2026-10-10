@@ -20,6 +20,9 @@ public final class ModConfig {
     @Config.Comment("Right-click a bed to set your spawn point at any time of day")
     public static Bed bed = new Bed();
 
+    @Config.Comment("Death location messages")
+    public static Death death = new Death();
+
     private ModConfig() {
     }
 
@@ -63,6 +66,11 @@ public final class ModConfig {
 
         @Config.Comment("Bed blocks to ignore: exact ids like 'modid:name' or whole mods like 'modid:*'")
         public String[] blockBlacklist = {"comforts:*"};
+    }
+
+    public static final class Death {
+        @Config.Comment("After respawning, tell the player where they died, with [Back] and [Share] buttons")
+        public boolean showCoordinates = true;
     }
 
     @Mod.EventBusSubscriber(modid = Tags.MOD_ID)

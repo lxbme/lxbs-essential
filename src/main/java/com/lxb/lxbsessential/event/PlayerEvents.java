@@ -2,8 +2,11 @@ package com.lxb.lxbsessential.event;
 
 import com.lxb.lxbsessential.Tags;
 import com.lxb.lxbsessential.config.ModConfig;
+import com.lxb.lxbsessential.death.DeathLog;
 import com.lxb.lxbsessential.teleport.TeleportService;
+import com.lxb.lxbsessential.data.Location;
 import com.lxb.lxbsessential.util.Locations;
+import com.lxb.lxbsessential.util.Messages;
 import com.lxb.lxbsessential.util.Storage;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraftforge.common.util.FakePlayer;
@@ -33,6 +36,7 @@ public final class PlayerEvents {
     public static void onLogout(PlayerEvent.PlayerLoggedOutEvent event) {
         UUID id = event.player.getUniqueID();
         TeleportService.forget(id);
+        DeathLog.INSTANCE.forget(id);
         if (Storage.isOpen()) {
             Storage.flushAndUnload(id);
         }
@@ -46,11 +50,26 @@ public final class PlayerEvents {
         }
         EntityPlayerMP player = (EntityPlayerMP) event.getEntityLiving();
         TeleportService.forget(player.getUniqueID());
+        if (ModConfig.death.showCoordinates) {
+            DeathLog.INSTANCE.record(player.getUniqueID(), Locations.of(player));
+        }
         if (!ModConfig.teleport.backOnDeath || !Storage.isOpen()) {
             return;
         }
         Storage.players().get(player.getUniqueID()).setBack(Locations.of(player));
         Storage.savePlayer(player);
+    }
+
+    /** Sent on respawn rather than on death: chat is hidden behind the death screen and fades out. */
+    @SubscribeEvent
+    public static void onRespawn(PlayerEvent.PlayerRespawnEvent event) {
+        if (event.isEndConquered() || !ModConfig.death.showCoordinates) {
+            return;
+        }
+        Location death = DeathLog.INSTANCE.takeNotice(event.player.getUniqueID());
+        if (death != null) {
+            event.player.sendMessage(Messages.deathNotice(death, ModConfig.teleport.backOnDeath));
+        }
     }
 
     @SubscribeEvent(priority = EventPriority.LOWEST)

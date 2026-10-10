@@ -7,8 +7,10 @@ import com.lxb.lxbsessential.command.CommandHome;
 import com.lxb.lxbsessential.command.CommandHomes;
 import com.lxb.lxbsessential.command.CommandSetHome;
 import com.lxb.lxbsessential.command.CommandSetWarp;
+import com.lxb.lxbsessential.command.CommandShareDeath;
 import com.lxb.lxbsessential.command.CommandWarp;
 import com.lxb.lxbsessential.command.CommandWarps;
+import com.lxb.lxbsessential.death.DeathLog;
 import com.lxb.lxbsessential.teleport.TeleportService;
 import com.lxb.lxbsessential.util.Storage;
 import net.minecraftforge.common.DimensionManager;
@@ -40,11 +42,13 @@ public class LxbsEssential {
         event.registerServerCommand(new CommandSetWarp());
         event.registerServerCommand(new CommandDelWarp());
         event.registerServerCommand(new CommandBack());
+        event.registerServerCommand(new CommandShareDeath());
     }
 
     @Mod.EventHandler
     public void onServerStopped(FMLServerStoppedEvent event) {
         TeleportService.reset();
+        DeathLog.INSTANCE.clear();
         Storage.close();
     }
 }

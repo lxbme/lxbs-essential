@@ -36,7 +36,7 @@ public final class CommandHomes extends PlayerCommand {
         }
         player.sendMessage(Messages.homesHeader(data.homeCount(), ModConfig.homes.maxHomes));
         for (NamedLocation home : data.listHomes()) {
-            player.sendMessage(Messages.listEntry(home));
+            player.sendMessage(Messages.listEntry(home, "/home"));
         }
     }
 }

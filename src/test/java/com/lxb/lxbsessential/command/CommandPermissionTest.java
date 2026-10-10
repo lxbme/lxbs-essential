@@ -49,4 +49,12 @@ class CommandPermissionTest {
         assertEquals("delwarp", new CommandDelWarp().getName());
         assertEquals("back", new CommandBack().getName());
     }
+
+    @Test
+    void shareDeathIsOpenToEveryone() {
+        CommandShareDeath command = new CommandShareDeath();
+        assertEquals("sharedeath", command.getName());
+        assertTrue(command.checkPermission(null, null));
+        assertEquals(0, command.getRequiredPermissionLevel());
+    }
 }

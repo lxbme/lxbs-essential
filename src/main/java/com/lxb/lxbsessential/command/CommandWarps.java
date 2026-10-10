@@ -34,7 +34,7 @@ public final class CommandWarps extends PlayerCommand {
         }
         sender.sendMessage(Messages.warpsHeader(warps.size()));
         for (NamedLocation warp : warps) {
-            sender.sendMessage(Messages.listEntry(warp));
+            sender.sendMessage(Messages.listEntry(warp, "/warp"));
         }
     }
 }

@@ -1,9 +1,12 @@
 package com.lxb.lxbsessential.util;
 
+import com.lxb.lxbsessential.data.Location;
 import com.lxb.lxbsessential.data.NamedLocation;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextFormatting;
+import net.minecraft.util.text.event.ClickEvent;
+import net.minecraft.util.text.event.HoverEvent;
 
 /**
  * Every player-facing string. Clients do not have this mod's language files,
@@ -96,8 +99,27 @@ public final class Messages {
 
     // shared listing / back
 
-    public static ITextComponent listEntry(NamedLocation entry) {
-        return new TextComponentString(" - " + entry.name + ": " + entry.location.describe());
+    /** One line of /homes or /warps; clicking anywhere on it runs {@code command <name>}. */
+    public static ITextComponent listEntry(NamedLocation entry, String command) {
+        ITextComponent line = new TextComponentString(" - ");
+        clickable(line, command + " " + entry.name, "Click to teleport");
+        ITextComponent name = new TextComponentString(entry.name);
+        name.getStyle().setUnderlined(true);
+        line.appendSibling(name);
+        line.appendSibling(new TextComponentString(": " + entry.location.describe()));
+        return line;
+    }
+
+    private static void clickable(ITextComponent component, String command, String hoverText) {
+        component.getStyle()
+                .setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, command))
+                .setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TextComponentString(hoverText)));
+    }
+
+    private static ITextComponent button(String label, String command, String hoverText) {
+        ITextComponent button = colored(label, TextFormatting.AQUA);
+        clickable(button, command, hoverText);
+        return button;
     }
 
     public static ITextComponent noBack() {
@@ -148,6 +170,31 @@ public final class Messages {
 
     public static ITextComponent teleported(String label) {
         return info("Teleported to " + label + ".");
+    }
+
+    // death
+
+    public static ITextComponent deathNotice(Location location, boolean withBack) {
+        ITextComponent notice = colored("You died at " + location.describe() + ".", TextFormatting.GOLD);
+        if (withBack) {
+            notice.appendSibling(new TextComponentString(" "));
+            notice.appendSibling(button("[Back]", "/back", "Teleport back to where you died"));
+        }
+        notice.appendSibling(new TextComponentString(" "));
+        notice.appendSibling(button("[Share]", "/sharedeath", "Tell everyone where you died"));
+        return notice;
+    }
+
+    public static ITextComponent deathShared(String playerName, Location location) {
+        return colored(playerName + " died at " + location.describe() + ".", TextFormatting.GOLD);
+    }
+
+    public static ITextComponent noDeathToShare() {
+        return error("You have no recent death to share.");
+    }
+
+    public static ITextComponent deathAlreadyShared() {
+        return error("You already shared this death.");
     }
 
     // storage / bed
