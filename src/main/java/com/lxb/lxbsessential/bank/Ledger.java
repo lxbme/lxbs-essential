@@ -1,5 +1,8 @@
 package com.lxb.lxbsessential.bank;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -8,6 +11,8 @@ import java.util.UUID;
 public final class Ledger {
 
     public enum PayResult { OK, INVALID_AMOUNT, SELF, INSUFFICIENT }
+
+    private static final Logger LOGGER = LogManager.getLogger("lxbsessential");
 
     private final LinkedHashMap<String, Account> accounts;
 
@@ -38,7 +43,19 @@ public final class Ledger {
                 if (Double.isNaN(account.carry) || account.carry < 0 || account.carry >= 1) {
                     account.carry = 0;
                 }
-                clean.put(id.toString(), account);
+                Account existing = clean.get(id.toString());
+                if (existing == null) {
+                    clean.put(id.toString(), account);
+                } else {
+                    // UUIDs are case-insensitive: a hand edit can spell one key twice, so merge instead of dropping one
+                    LOGGER.warn("bank.json has two entries for {}; merging them", id);
+                    existing.balance = addCapped(existing.balance, account.balance);
+                    existing.pendingReceived = addCapped(existing.pendingReceived, account.pendingReceived);
+                    existing.onlineTicks = Math.max(existing.onlineTicks, account.onlineTicks);
+                    if (existing.name.isEmpty()) {
+                        existing.name = account.name;
+                    }
+                }
             }
         }
         return new Ledger(clean);
@@ -92,7 +109,8 @@ public final class Ledger {
         return taken;
     }
 
-    public PayResult pay(UUID from, UUID to, String toName, long points, boolean recipientOnline) {
+    /** Validates a transfer without changing anything. */
+    public PayResult checkPay(UUID from, UUID to, long points) {
         if (points <= 0) {
             return PayResult.INVALID_AMOUNT;
         }
@@ -101,6 +119,14 @@ public final class Ledger {
         }
         if (balance(from) < points) {
             return PayResult.INSUFFICIENT;
+        }
+        return PayResult.OK;
+    }
+
+    public PayResult pay(UUID from, UUID to, String toName, long points, boolean recipientOnline) {
+        PayResult check = checkPay(from, to, points);
+        if (check != PayResult.OK) {
+            return check;
         }
         take(from, points);
         Account recipient = account(to, toName);

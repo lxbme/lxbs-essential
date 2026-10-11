@@ -193,8 +193,7 @@ public final class CommandXpBank extends PlayerCommand {
         long points = parseLong(args[2], 1, MAX_INPUT);
         UUID from = player.getUniqueID();
         try {
-            Ledger.PayResult result = bank().commit(ledger ->
-                    ledger.pay(from, target.id, target.name, points, target.online != null));
+            Ledger.PayResult result = bank().pay(from, target.id, target.name, points, target.online != null);
             switch (result) {
                 case SELF:
                     player.sendMessage(Messages.paySelf());

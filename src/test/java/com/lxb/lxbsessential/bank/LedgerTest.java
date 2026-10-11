@@ -158,4 +158,42 @@ class LedgerTest {
     void fromStorageOfNothingIsEmpty() {
         assertEquals(0, Ledger.fromStorage(null).toStorage().size());
     }
+
+    /** UUID keys are case-insensitive; two hand-edited spellings of one key must merge, not overwrite. */
+    @Test
+    void fromStorageMergesKeysThatDifferOnlyInCase() {
+        Account lower = new Account();
+        lower.name = "Alice";
+        lower.balance = 10;
+        lower.onlineTicks = 3;
+        lower.pendingReceived = 2;
+        Account upper = new Account();
+        upper.name = "";
+        upper.balance = 5;
+        upper.onlineTicks = 7;
+        upper.pendingReceived = 4;
+        Map<String, Account> raw = new LinkedHashMap<>();
+        raw.put("0000000a-0000-0000-0000-00000000abcd", lower);
+        raw.put("0000000A-0000-0000-0000-00000000ABCD", upper);
+
+        Ledger ledger = Ledger.fromStorage(raw);
+        UUID id = UUID.fromString("0000000a-0000-0000-0000-00000000abcd");
+        assertEquals(1, ledger.toStorage().size());
+        assertEquals(15, ledger.balance(id));
+        assertEquals("Alice", ledger.name(id));
+        assertEquals(3, ledger.ticksUntilInterest(id, 10));
+        assertEquals(6, ledger.takePendingReceived(id));
+    }
+
+    @Test
+    void checkPayReportsWithoutChangingAnything() {
+        Ledger ledger = new Ledger();
+        ledger.deposit(A, "Alice", 100);
+        assertEquals(Ledger.PayResult.OK, ledger.checkPay(A, B, 40));
+        assertEquals(Ledger.PayResult.INVALID_AMOUNT, ledger.checkPay(A, B, 0));
+        assertEquals(Ledger.PayResult.SELF, ledger.checkPay(A, A, 10));
+        assertEquals(Ledger.PayResult.INSUFFICIENT, ledger.checkPay(A, B, 101));
+        assertEquals(100, ledger.balance(A));
+        assertEquals(0, ledger.balance(B));
+    }
 }
