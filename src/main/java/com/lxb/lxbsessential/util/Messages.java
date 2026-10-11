@@ -41,7 +41,7 @@ public final class Messages {
         return colored(text, TextFormatting.GREEN);
     }
 
-    private static ITextComponent colored(String text, TextFormatting color) {
+    static ITextComponent colored(String text, TextFormatting color) {
         ITextComponent component = new TextComponentString(text);
         component.getStyle().setColor(color);
         return component;
@@ -138,7 +138,7 @@ public final class Messages {
         return component;
     }
 
-    private static ITextComponent button(String label, String command, String hoverText) {
+    static ITextComponent button(String label, String command, String hoverText) {
         ITextComponent button = colored(label, TextFormatting.AQUA);
         clickable(button, command, hoverText);
         return button;
@@ -279,6 +279,11 @@ public final class Messages {
 
     private static String percent(double value) {
         return new DecimalFormat("0.##", DecimalFormatSymbols.getInstance(Locale.ROOT)).format(value) + "%";
+    }
+
+    /** Up to two decimals, no trailing zeros, always with a dot. */
+    static String number(double value) {
+        return new DecimalFormat("0.##", DecimalFormatSymbols.getInstance(Locale.ROOT)).format(value);
     }
 
     public static ITextComponent bankBalance(long balance, int levelsFromZero, long minutesToInterest) {
