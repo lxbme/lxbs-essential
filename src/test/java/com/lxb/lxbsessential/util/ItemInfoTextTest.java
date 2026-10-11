@@ -130,13 +130,35 @@ class ItemInfoTextTest {
     void oversizedItemHasNoHover() {
         ItemStack stack = blade();
         StringBuilder padding = new StringBuilder();
-        for (int i = 0; i < ItemInfoText.MAX_HOVER_LENGTH + 1000; i++) {
+        for (int i = 0; i < ItemInfoText.MAX_CHAT_JSON_BYTES + 1000; i++) {
             padding.append('x');
         }
         stack.getTagCompound().setString("pad", padding.toString());
 
         ITextComponent header = ItemInfoText.report(report(stack), false).get(0);
         assertNull(part(header, "Blade").getStyle().getHoverEvent());
+    }
+
+    /**
+     * The chat packet limit is 32767 UTF-8 bytes of JSON, not characters: a long Chinese book is short in
+     * characters but three bytes per character, and the escaped hover is longer still. Too big kicks the
+     * viewer, and with [Share] everyone online.
+     */
+    @Test
+    void chineseTextCountsInBytesForTheHoverLimit() {
+        ItemStack stack = blade();
+        StringBuilder padding = new StringBuilder();
+        for (int i = 0; i < 11000; i++) {
+            padding.append('中');
+        }
+        stack.getTagCompound().setString("pad", padding.toString());
+
+        for (boolean shared : new boolean[]{false, true}) {
+            ITextComponent header = ItemInfoText.report(report(stack), shared).get(0);
+            assertNull(part(header, "Blade").getStyle().getHoverEvent());
+            assertTrue(ITextComponent.Serializer.componentToJson(header)
+                    .getBytes(java.nio.charset.StandardCharsets.UTF_8).length <= ItemInfoText.MAX_CHAT_JSON_BYTES);
+        }
     }
 
     @Test

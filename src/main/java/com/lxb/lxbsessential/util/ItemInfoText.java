@@ -9,7 +9,6 @@ import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentString;
@@ -17,6 +16,7 @@ import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
 
 import javax.annotation.Nullable;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -28,8 +28,11 @@ import java.util.Map;
  */
 public final class ItemInfoText {
 
-    /** Larger item hovers risk a chat packet big enough to kick the player. */
-    static final int MAX_HOVER_LENGTH = 16000;
+    /**
+     * PacketBuffer.writeString refuses chat JSON over 32767 UTF-8 bytes, and the failed encode disconnects
+     * every receiver. Characters are not enough: CJK text is three bytes each and Gson escapes the hover.
+     */
+    static final int MAX_CHAT_JSON_BYTES = 32767;
 
     private static final String ESTIMATE = " (vanilla estimate)";
     private static final String[] ROMAN = {"I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X"};
@@ -75,10 +78,20 @@ public final class ItemInfoText {
         return lines;
     }
 
+    /** The item hover is dropped when it would make the line too big to send. */
     private static ITextComponent header(ItemReport report, boolean shared) {
+        ITextComponent header = header(report, shared, true);
+        if (ITextComponent.Serializer.componentToJson(header).getBytes(StandardCharsets.UTF_8).length
+                > MAX_CHAT_JSON_BYTES) {
+            header = header(report, shared, false);
+        }
+        return header;
+    }
+
+    private static ITextComponent header(ItemReport report, boolean shared, boolean hover) {
         ITextComponent header = Messages.colored(
                 shared ? report.holderName + " shared: " : "── Item Info ── ", TextFormatting.GOLD);
-        header.appendSibling(itemName(report.stack));
+        header.appendSibling(itemName(report.stack, hover));
         if (!shared) {
             header.appendSibling(new TextComponentString(" "));
             header.appendSibling(Messages.button("[Share]", "/info share", "Show this item to everyone"));
@@ -87,9 +100,9 @@ public final class ItemInfoText {
     }
 
     /** Vanilla's [name] component: rarity colour and a hover the client renders as the full tooltip. */
-    private static ITextComponent itemName(ItemStack stack) {
+    private static ITextComponent itemName(ItemStack stack, boolean hover) {
         ITextComponent name = stack.getTextComponent();
-        if (stack.writeToNBT(new NBTTagCompound()).toString().length() > MAX_HOVER_LENGTH) {
+        if (!hover) {
             name.getStyle().setHoverEvent(null);
         }
         return name;
