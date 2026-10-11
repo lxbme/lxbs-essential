@@ -3,6 +3,7 @@ package com.lxb.lxbsessential.event;
 import com.lxb.lxbsessential.Tags;
 import com.lxb.lxbsessential.config.ModConfig;
 import com.lxb.lxbsessential.death.DeathLog;
+import com.lxb.lxbsessential.info.ShareCache;
 import com.lxb.lxbsessential.teleport.TeleportService;
 import com.lxb.lxbsessential.data.Location;
 import com.lxb.lxbsessential.util.Locations;
@@ -37,6 +38,7 @@ public final class PlayerEvents {
         UUID id = event.player.getUniqueID();
         TeleportService.forget(id);
         DeathLog.INSTANCE.forget(id);
+        ShareCache.REPORTS.forget(id);
         if (Storage.isOpen()) {
             Storage.flushAndUnload(id);
         }

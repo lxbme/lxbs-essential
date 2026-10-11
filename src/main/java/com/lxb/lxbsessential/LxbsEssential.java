@@ -8,6 +8,7 @@ import com.lxb.lxbsessential.command.CommandFix;
 import com.lxb.lxbsessential.command.CommandHeal;
 import com.lxb.lxbsessential.command.CommandHome;
 import com.lxb.lxbsessential.command.CommandHomes;
+import com.lxb.lxbsessential.command.CommandInfo;
 import com.lxb.lxbsessential.command.CommandPhase;
 import com.lxb.lxbsessential.command.CommandSetHome;
 import com.lxb.lxbsessential.command.CommandSetWarp;
@@ -19,6 +20,10 @@ import com.lxb.lxbsessential.config.ModConfig;
 import com.lxb.lxbsessential.death.DeathLog;
 import com.lxb.lxbsessential.heal.FirstAidBridge;
 import com.lxb.lxbsessential.heal.SimpleDifficultyBridge;
+import com.lxb.lxbsessential.info.FirstAidArmor;
+import com.lxb.lxbsessential.info.Integrations;
+import com.lxb.lxbsessential.info.ShareCache;
+import com.lxb.lxbsessential.info.SpartanBridge;
 import com.lxb.lxbsessential.phase.SrpBridge;
 import com.lxb.lxbsessential.teleport.TeleportService;
 import com.lxb.lxbsessential.util.Storage;
@@ -58,6 +63,7 @@ public class LxbsEssential {
         event.registerServerCommand(new CommandShareDeath());
         event.registerServerCommand(new CommandFix());
         event.registerServerCommand(new CommandHeal(bindFirstAid(), bindSimpleDifficulty()));
+        event.registerServerCommand(new CommandInfo(bindInfoIntegrations()));
         if (ModConfig.bank.enabled) {
             event.registerServerCommand(new CommandXpBank());
         }
@@ -87,6 +93,25 @@ public class LxbsEssential {
         return bridge;
     }
 
+    private static Integrations bindInfoIntegrations() {
+        SpartanBridge spartan = null;
+        if (Loader.isModLoaded("spartanweaponry")) {
+            spartan = SpartanBridge.bind(SpartanBridge.LONGBOW);
+            if (spartan == null) {
+                LOGGER.warn("Spartan Weaponry is installed but its longbow API does not match; /info will estimate longbows with vanilla numbers");
+            }
+        }
+        boolean firstAidInstalled = Loader.isModLoaded("firstaid");
+        FirstAidArmor firstAid = null;
+        if (firstAidInstalled) {
+            firstAid = FirstAidArmor.bind(FirstAidArmor.ARMOR_UTILS, FirstAidArmor.CONFIG);
+            if (firstAid == null) {
+                LOGGER.warn("First Aid is installed but its armor API does not match; /info will show vanilla armor numbers");
+            }
+        }
+        return new Integrations(spartan, firstAid, firstAidInstalled);
+    }
+
     /** /phase only exists when Scape and Run: Parasites is installed and its API matches what SrpBridge expects. */
     private static void registerPhaseCommand(FMLServerStartingEvent event) {
         if (!ModConfig.parasites.phaseCommand || !Loader.isModLoaded("srparasites")) {
@@ -105,6 +130,7 @@ public class LxbsEssential {
     public void onServerStopped(FMLServerStoppedEvent event) {
         TeleportService.reset();
         DeathLog.INSTANCE.clear();
+        ShareCache.REPORTS.clear();
         Bank.close();
         Storage.close();
     }

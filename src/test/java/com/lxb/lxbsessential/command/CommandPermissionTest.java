@@ -87,4 +87,12 @@ class CommandPermissionTest {
         assertTrue(command.checkPermission(null, null));
         assertEquals(0, command.getRequiredPermissionLevel());
     }
+
+    @Test
+    void infoIsOpenToEveryone() {
+        CommandInfo command = new CommandInfo(com.lxb.lxbsessential.info.Integrations.NONE);
+        assertEquals("info", command.getName());
+        assertTrue(command.checkPermission(null, null));
+        assertEquals(0, command.getRequiredPermissionLevel());
+    }
 }
