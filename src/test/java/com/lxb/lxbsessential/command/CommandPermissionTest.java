@@ -4,6 +4,7 @@ import net.minecraft.command.CommandBase;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class CommandPermissionTest {
@@ -94,5 +95,22 @@ class CommandPermissionTest {
         assertEquals("info", command.getName());
         assertTrue(command.checkPermission(null, null));
         assertEquals(0, command.getRequiredPermissionLevel());
+    }
+
+    @Test
+    void saveItemIsOperatorOnly() {
+        CommandSaveItem command = new CommandSaveItem();
+        assertEquals("saveitem", command.getName());
+        assertTrue(command.getAliases().contains("si"));
+        assertEquals(2, command.getRequiredPermissionLevel());
+    }
+
+    /** Lets "/si give name @a" run once per matching player. */
+    @Test
+    void saveItemGiveTargetIsAPlayerArgument() {
+        CommandSaveItem command = new CommandSaveItem();
+        assertTrue(command.isUsernameIndex(new String[]{"give", "sword", "@a"}, 2));
+        assertFalse(command.isUsernameIndex(new String[]{"save", "@a"}, 1));
+        assertFalse(command.isUsernameIndex(new String[0], 0));
     }
 }

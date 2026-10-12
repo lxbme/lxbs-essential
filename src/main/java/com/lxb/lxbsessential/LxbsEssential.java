@@ -10,6 +10,7 @@ import com.lxb.lxbsessential.command.CommandHome;
 import com.lxb.lxbsessential.command.CommandHomes;
 import com.lxb.lxbsessential.command.CommandInfo;
 import com.lxb.lxbsessential.command.CommandPhase;
+import com.lxb.lxbsessential.command.CommandSaveItem;
 import com.lxb.lxbsessential.command.CommandSetHome;
 import com.lxb.lxbsessential.command.CommandSetWarp;
 import com.lxb.lxbsessential.command.CommandShareDeath;
@@ -64,6 +65,7 @@ public class LxbsEssential {
         event.registerServerCommand(new CommandFix());
         event.registerServerCommand(new CommandHeal(bindFirstAid(), bindSimpleDifficulty()));
         event.registerServerCommand(new CommandInfo(bindInfoIntegrations()));
+        event.registerServerCommand(new CommandSaveItem());
         if (ModConfig.bank.enabled) {
             event.registerServerCommand(new CommandXpBank());
         }
