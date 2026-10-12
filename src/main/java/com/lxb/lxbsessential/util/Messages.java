@@ -9,6 +9,8 @@ import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.event.ClickEvent;
 import net.minecraft.util.text.event.HoverEvent;
 
+import javax.annotation.Nullable;
+
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
@@ -163,6 +165,101 @@ public final class Messages {
 
     public static ITextComponent noBack() {
         return error("You have no location to go back to.");
+    }
+
+    // saved items
+
+    public static ITextComponent savedItemSaved(String name, ItemStack stack) {
+        return withItem(stack, item -> {
+            ITextComponent line = info("Saved ");
+            line.appendSibling(item);
+            line.appendSibling(new TextComponentString(" ×" + stack.getCount() + " as '" + name + "'."));
+            return line;
+        });
+    }
+
+    public static ITextComponent savedItemUpdated(String name, ItemStack stack) {
+        return withItem(stack, item -> {
+            ITextComponent line = info("Updated '" + name + "' to ");
+            line.appendSibling(item);
+            line.appendSibling(new TextComponentString(" ×" + stack.getCount() + "."));
+            return line;
+        });
+    }
+
+    public static ITextComponent savedItemDeleted(String name) {
+        return info("Deleted saved item '" + name + "'.");
+    }
+
+    public static ITextComponent savedItemExists(String name) {
+        return error("A saved item named '" + name + "' already exists. Use /si update " + name + " to replace it.");
+    }
+
+    public static ITextComponent noSavedItem(String name) {
+        return error("No saved item named '" + name + "'.");
+    }
+
+    public static ITextComponent savedItemMissing(String name) {
+        return error("Saved item '" + name + "' no longer exists in this game (was it from a removed mod?)");
+    }
+
+    public static ITextComponent savedItemUnreadable(String name) {
+        return error("Saved item '" + name + "' has unreadable data in saved_items.json.");
+    }
+
+    public static ITextComponent savedItemNotExact() {
+        return error("This item cannot be saved exactly, so it was not saved.");
+    }
+
+    public static ITextComponent noSavedItems() {
+        return error("No saved items yet.");
+    }
+
+    public static ITextComponent savedItemsHeader(int count) {
+        return info("Saved items (" + count + "):");
+    }
+
+    /** Clicking puts "/si give <name> " in the chat box, so the player and count can be added. */
+    public static ITextComponent savedItemEntry(String name, ItemStack stack, @Nullable String savedBy) {
+        String suffix = " (saved by " + (savedBy == null ? "unknown" : savedBy) + ")";
+        if (stack.isEmpty()) {
+            ITextComponent line = new TextComponentString(" - " + name + ": ");
+            line.appendSibling(colored("[missing item]", TextFormatting.RED));
+            line.appendSibling(new TextComponentString(suffix));
+            return line;
+        }
+        return withItem(stack, item -> {
+            ITextComponent line = new TextComponentString(" - " + name + ": ");
+            line.getStyle()
+                    .setClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/si give " + name + " "))
+                    .setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
+                            new TextComponentString("Click to fill in the give command")));
+            line.appendSibling(item);
+            line.appendSibling(new TextComponentString(" ×" + stack.getCount() + suffix));
+            return line;
+        });
+    }
+
+    public static ITextComponent gave(int count, ItemStack stack, String target) {
+        return withItem(stack, item -> {
+            ITextComponent line = info("Gave " + count + " × ");
+            line.appendSibling(item);
+            line.appendSibling(new TextComponentString(" to " + target + "."));
+            return line;
+        });
+    }
+
+    public static ITextComponent received(int count, ItemStack stack) {
+        return withItem(stack, item -> {
+            ITextComponent line = info("You received " + count + " × ");
+            line.appendSibling(item);
+            line.appendSibling(new TextComponentString("."));
+            return line;
+        });
+    }
+
+    public static ITextComponent tooMany(int max) {
+        return error("At most " + max + " at once.");
     }
 
     // teleport
