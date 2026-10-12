@@ -3,6 +3,7 @@ package com.lxb.lxbsessential.util;
 import com.lxb.lxbsessential.LxbsEssential;
 import com.lxb.lxbsessential.data.PlayerStore;
 import com.lxb.lxbsessential.data.WarpStore;
+import com.lxb.lxbsessential.saveditem.SavedItemStore;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.player.EntityPlayerMP;
 
@@ -15,6 +16,7 @@ public final class Storage {
 
     private static PlayerStore players;
     private static WarpStore warps;
+    private static SavedItemStore savedItems;
 
     private Storage() {
     }
@@ -23,11 +25,14 @@ public final class Storage {
         players = new PlayerStore(root);
         warps = new WarpStore(root);
         warps.load();
+        savedItems = new SavedItemStore(root);
+        savedItems.load();
     }
 
     public static void close() {
         players = null;
         warps = null;
+        savedItems = null;
     }
 
     public static boolean isOpen() {
@@ -40,6 +45,10 @@ public final class Storage {
 
     public static WarpStore warps() {
         return warps;
+    }
+
+    public static SavedItemStore savedItems() {
+        return savedItems;
     }
 
     /** Changes stay in memory on failure, so the next successful save still persists them. */
