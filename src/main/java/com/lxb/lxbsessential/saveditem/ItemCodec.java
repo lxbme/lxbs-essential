@@ -5,6 +5,8 @@ import net.minecraft.nbt.JsonToNBT;
 import net.minecraft.nbt.NBTException;
 import net.minecraft.nbt.NBTTagCompound;
 
+import java.nio.charset.StandardCharsets;
+
 /**
  * Items as SNBT text, the format /give uses. It records the registry name rather than a numeric id, plus
  * count, damage, tag and Forge capability data. Saving checks the text reads back to the same NBT, so
@@ -26,6 +28,9 @@ public final class ItemCodec {
         }
         if (!tag.equals(parsed)) {
             throw new NotExact("its NBT text reads back different");
+        }
+        if (!StandardCharsets.UTF_8.newEncoder().canEncode(text)) {
+            throw new NotExact("its NBT text cannot be written as UTF-8");
         }
         return text;
     }

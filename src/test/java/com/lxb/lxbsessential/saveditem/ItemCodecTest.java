@@ -81,6 +81,15 @@ class ItemCodecTest {
         assertThrows(ItemCodec.NotExact.class, () -> ItemCodec.encode(stack));
     }
 
+    /** A lone UTF-16 surrogate survives SNBT but cannot be written to the UTF-8 file. */
+    @Test
+    void textThatCannotBeWrittenAsUtf8IsRefused() {
+        ItemStack stack = new ItemStack(Items.STICK);
+        stack.setStackDisplayName("broken \ud800 name");
+
+        assertThrows(ItemCodec.NotExact.class, () -> ItemCodec.encode(stack));
+    }
+
     /** A saved item whose mod was removed decodes to an empty stack instead of something else. */
     @Test
     void unknownItemDecodesEmpty() throws Exception {

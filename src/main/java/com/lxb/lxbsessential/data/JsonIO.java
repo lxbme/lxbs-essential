@@ -2,6 +2,7 @@ package com.lxb.lxbsessential.data;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonIOException;
 import com.google.gson.JsonParseException;
 
 import java.io.IOException;
@@ -70,7 +71,12 @@ public final class JsonIO {
         try (FileChannel channel = FileChannel.open(tmp, StandardOpenOption.WRITE,
                 StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
              Writer writer = Channels.newWriter(channel, StandardCharsets.UTF_8.newEncoder(), -1)) {
-            GSON.toJson(value, writer);
+            try {
+                GSON.toJson(value, writer);
+            } catch (JsonIOException e) {
+                // Gson wraps the writer's IOException (disk full, unencodable text); callers handle IOException
+                throw e.getCause() instanceof IOException ? (IOException) e.getCause() : new IOException(e);
+            }
             writer.flush();
             // Make the data durable before the rename, so a power loss cannot leave an empty file behind.
             channel.force(true);

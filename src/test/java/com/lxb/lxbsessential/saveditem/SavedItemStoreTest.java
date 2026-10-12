@@ -109,6 +109,21 @@ class SavedItemStoreTest {
         assertEquals("{a}", store.get("sword").item);
     }
 
+    /**
+     * Gson reports an encoder failure mid-write as an unchecked JsonIOException; it must still roll back.
+     * A lone UTF-16 surrogate cannot be written as UTF-8, so it fails inside Gson like a full disk would.
+     */
+    @Test
+    void failureInsideTheJsonWriterRollsBackToo() throws IOException {
+        SavedItemStore store = loaded();
+        store.put(item("Good", "{a}"));
+
+        assertThrows(IOException.class, () -> store.put(item("Bad", "{name:\"\ud800\"}")));
+        assertNull(store.get("bad"));
+        assertNotNull(loaded().get("good"));
+        assertNull(loaded().get("bad"));
+    }
+
     @Test
     void handEditedEntriesAreNormalisedOrDropped() throws IOException {
         String json = "{"
