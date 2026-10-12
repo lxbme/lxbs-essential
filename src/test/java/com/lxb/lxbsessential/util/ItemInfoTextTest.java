@@ -130,7 +130,7 @@ class ItemInfoTextTest {
     void oversizedItemHasNoHover() {
         ItemStack stack = blade();
         StringBuilder padding = new StringBuilder();
-        for (int i = 0; i < ItemInfoText.MAX_CHAT_JSON_BYTES + 1000; i++) {
+        for (int i = 0; i < ChatLimits.MAX_JSON_BYTES + 1000; i++) {
             padding.append('x');
         }
         stack.getTagCompound().setString("pad", padding.toString());
@@ -157,7 +157,7 @@ class ItemInfoTextTest {
             ITextComponent header = ItemInfoText.report(report(stack), shared).get(0);
             assertNull(part(header, "Blade").getStyle().getHoverEvent());
             assertTrue(ITextComponent.Serializer.componentToJson(header)
-                    .getBytes(java.nio.charset.StandardCharsets.UTF_8).length <= ItemInfoText.MAX_CHAT_JSON_BYTES);
+                    .getBytes(java.nio.charset.StandardCharsets.UTF_8).length <= ChatLimits.MAX_JSON_BYTES);
         }
     }
 

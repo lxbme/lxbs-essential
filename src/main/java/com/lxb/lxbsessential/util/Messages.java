@@ -2,6 +2,7 @@ package com.lxb.lxbsessential.util;
 
 import com.lxb.lxbsessential.data.Location;
 import com.lxb.lxbsessential.data.NamedLocation;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextFormatting;
@@ -13,6 +14,7 @@ import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.function.Function;
 
 /**
  * Every player-facing string. Clients do not have this mod's language files,
@@ -114,6 +116,21 @@ public final class Messages {
         line.appendSibling(name);
         line.appendSibling(new TextComponentString(": " + entry.location.describe()));
         return line;
+    }
+
+    /** Vanilla's [name] component: rarity colour and, with hover, the client's full tooltip. */
+    static ITextComponent itemName(ItemStack stack, boolean hover) {
+        ITextComponent name = stack.getTextComponent();
+        if (!hover) {
+            name.getStyle().setHoverEvent(null);
+        }
+        return name;
+    }
+
+    /** Builds a line around an item name, again without the item hover if the line would be too big to send. */
+    static ITextComponent withItem(ItemStack stack, Function<ITextComponent, ITextComponent> line) {
+        ITextComponent full = line.apply(itemName(stack, true));
+        return ChatLimits.fits(full) ? full : line.apply(itemName(stack, false));
     }
 
     private static void clickable(ITextComponent component, String command, String hoverText) {
